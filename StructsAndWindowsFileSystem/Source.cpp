@@ -1,51 +1,60 @@
 #include <Windows.h>
+#include <string>
 #include <iostream>
 using namespace std;
 
-const int MaxLength = 64;
+const int MAX_CHAR_LENGTH = 64;
 
-struct itemInfo {
+struct ItemInfo {
 	int itemID;
 	int quantity;
 	double price;
-	char description[MaxLength];
+	char description[MAX_CHAR_LENGTH];
+
+	ItemInfo() : itemID(1), quantity(1), price(1), description("description") {};
+
+	void setItem(int id, int q, double p)
+	{
+		itemID = id;
+		quantity = q;
+		price = p;
+	}
+
+	string toString()
+	{
+		return "item id: " + itemID; // + "\nquantity: " + quantity + "\nprice: " + price + "description: " + description + "\n\n";
+	};
 };
 
 void main()
 {
-	itemInfo testItem;
+	const int ITEM_LIMIT = 4;
 
-	cout << "Enter item id: ";
-	cin >> testItem.itemID;
-	cout << "Enter quantity: ";
-	cin >> testItem.quantity;
-	cout << "Enter price: ";
-	cin >> testItem.price;
-	cout << "Enter description: ";
-	cin >> testItem.description;
+	ItemInfo itemList[ITEM_LIMIT];
 
-	cout << testItem.itemID << endl;
-	cout << testItem.quantity << endl;
-	cout << testItem.price << endl;
-	cout << testItem.description << endl;
-
-	//double value;
+	//set some values for the items
+	for (int i = 1; i < ITEM_LIMIT+1; i++)
+	{
+		itemList[i].setItem(i, i + 1, 2.99);
+	}
 
 	DWORD count;
 	//char data[250] = { 0 };
-	HANDLE file;
+	HANDLE writer;
 
-	TCHAR fileName[] = TEXT("C:\\Users\\ebbmf\\Documents\\Operating Systems\\OrderData.out");
+	TCHAR fileName[] = TEXT("C:\\Users\\Evan\\Desktop\\OrderData.out");
 
-	file = CreateFile(fileName, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	writer = CreateFile(fileName, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 
-	WriteFile(file, &testItem, sizeof(testItem), &count, NULL);
+	for (int i = 0; i < ITEM_LIMIT; ++i) {
+		WriteFile(writer, &itemList[i].toString(), sizeof(itemList[i].toString()), &count, NULL);
+	}
 
 
 	//SetFilePointer(file, 0, 0, FILE_BEGIN);
 	//ReadFile(file, &value, sizeof(itemInfo., &count, NULL);
 	//cout <<  value << endl;
 
-	CloseHandle(file);
+	CloseHandle(writer);
 	Sleep(5000);
 }
