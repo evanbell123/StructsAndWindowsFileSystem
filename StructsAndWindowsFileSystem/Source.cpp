@@ -19,11 +19,6 @@ struct ItemInfo {
 		quantity = q;
 		price = p;
 	}
-
-	string toString()
-	{
-		return "item id: " + itemID; // + "\nquantity: " + quantity + "\nprice: " + price + "description: " + description + "\n\n";
-	};
 };
 
 void main()
@@ -32,29 +27,37 @@ void main()
 
 	ItemInfo itemList[ITEM_LIMIT];
 
-	//set some values for the items
+	//set some values for each item in the array
 	for (int i = 1; i < ITEM_LIMIT+1; i++)
 	{
-		itemList[i].setItem(i, i + 1, 2.99);
+		itemList[i-1].setItem(i, i + 1, 2.99);
 	}
 
 	DWORD count;
-	//char data[250] = { 0 };
-	HANDLE writer;
+	HANDLE file;
+	TCHAR fileName[] = TEXT("C:\\Users\\ebbmf\\Desktop\\OrderData.out");
 
-	TCHAR fileName[] = TEXT("C:\\Users\\Evan\\Desktop\\OrderData.out");
+	//create file for read and write
+	file = CreateFile(fileName, GENERIC_WRITE | GENERIC_READ, 0, NULL, CREATE_ALWAYS, FILE_FLAG_RANDOM_ACCESS, NULL);
 
-	writer = CreateFile(fileName, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-
+	// write each item in the array to the disk
 	for (int i = 0; i < ITEM_LIMIT; ++i) {
-		WriteFile(writer, &itemList[i].toString(), sizeof(itemList[i].toString()), &count, NULL);
+		WriteFile(file, &itemList[i], sizeof(itemList[i]), &count, NULL);
 	}
 
+	ItemInfo itemListRead[ITEM_LIMIT];
 
-	//SetFilePointer(file, 0, 0, FILE_BEGIN);
-	//ReadFile(file, &value, sizeof(itemInfo., &count, NULL);
-	//cout <<  value << endl;
-
-	CloseHandle(writer);
+	//read each item from the disk and display on the monitor
+	for (int i = ITEM_LIMIT-1; i >= 0; i--)
+	{
+		SetFilePointer(file, i*sizeof(ItemInfo), 0, FILE_BEGIN);
+		ReadFile(file, &itemListRead[i], sizeof(itemListRead[i]), &count, NULL);
+		cout << "Item ID # " << itemListRead[i].itemID << endl
+			<< "Quantity: " << itemListRead[i].quantity << endl
+			<< "Price: " << itemListRead[i].price << endl
+			<< "Description: " << itemListRead[i].description << endl << endl;
+	}
+	
+	CloseHandle(file);
 	Sleep(5000);
 }
